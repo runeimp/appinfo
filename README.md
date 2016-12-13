@@ -1,7 +1,9 @@
 AppInfo
 =======
 
-Simple command line tool (BASH script) to gain pertinent app info. For me at least. This was created on OS X. Should work in other BASH environments as well but has not yet been tested anywhere else.
+Simple command line tool (BASH script) to gain pertinent app info for all executables with the specified name in your `$PATH`. Pertinent for me at least. You, I have no idea. Maybe yes. Maybe no. We shall see.
+
+This was created on OS X. Should work in other BASH environments as well but has not yet been tested anywhere else.
 
 Example Usage
 -------------
@@ -9,21 +11,34 @@ Example Usage
 ```
 $ appinfo git
 
-  App Path:    /Library/Developer/CommandLineTools/usr/bin/git
   App Label:   git version 2.7.4 (Apple Git-66)
   App Version: 2.7.4
-  App Size:    1 MB or 1825856 Bytes
+  File Path:   /Library/Developer/CommandLineTools/usr/bin/git
+  File Size:   1 MB or 1825856 Bytes
 
-  App Path:    /usr/local/bin/git
   App Label:   git version 2.11.0
   App Version: 2.11.0
-  App Size:    1 MB or 1926032 Bytes
-  symlink:     /usr/local/Cellar/git/2.11.0/bin/git
+  File Path:   /usr/local/bin/git
+  File Size:   1 MB or 1926032 Bytes
+  Symlink to:  /usr/local/Cellar/git/2.11.0/bin/git
 
-  App Path:    /usr/bin/git
   App Label:   git version 2.7.4 (Apple Git-66)
   App Version: 2.7.4
-  App Size:    17 KB or 18176 Bytes
+  File Path:   /usr/bin/git
+  File Size:   17 KB or 18176 Bytes
+
+$ fileinfo git
+
+  File Path:   /Library/Developer/CommandLineTools/usr/bin/git
+  File Size:   1 MB or 1825856 Bytes
+
+  File Path:   /usr/local/bin/git
+  File Size:   1 MB or 1926032 Bytes
+  Symlink to:  /usr/local/Cellar/git/2.11.0/bin/git
+
+  File Path:   /usr/bin/git
+  File Size:   17 KB or 18176 Bytes
+
 ```
 
 Note that in the case of symlinks the _App Size_ is the size of the linked to file. Not the symlink reference.
@@ -45,18 +60,24 @@ $ cd ~
 $ mkdir repos
 $ cd repos
 $ git clone git@github.com:runeimp/appinfo.git
-$ chmod u+x appinfo/appinfo
+$ chmod u+x appinfo/*info
 $ cd ~/bin
 $ ln -s ../repos/appinfo/appinfo
+$ ln -s ../repos/appinfo/fileinfo
 $ cd ~
 $ appinfo git
 
-  App Path:    /usr/bin/git
   App Label:   git version 2.7.4 (Apple Git-66)
   App Version: 2.7.4
-  App Size:    17 KB or 18176 Bytes
+  File Path:   /usr/bin/git
+  File Size:   17 KB or 18176 Bytes
 
 ```
 
 This example should represent the default git installed in OS X 10.11.x _El Capitan_. Other operating systems (including other versions of OS X/macOS) will likely show other information.
 
+
+Guarantee
+---------
+
+It works on my system. I make no statement of fitness for your usage. Use at your own risk. :angel:
