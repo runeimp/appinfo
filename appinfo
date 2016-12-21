@@ -5,6 +5,8 @@
 #####
 # ChangeLog
 # ---------
+# 2016-12-11  1.2.0      Added new label check method. No options...
+#                        Now using my trim app instead of xargs.
 # 2016-12-11  1.1.0      Now calls fileinfo script for basic file info
 # 2016-12-10  1.0.0      Initial script creation
 #
@@ -14,7 +16,7 @@
 # APP DATA
 #
 declare -r APP_NAME='AppInfo'
-declare -r APP_VERSION='1.1.0'
+declare -r APP_VERSION='1.2.0'
 declare -r APP_LABEL="$APP_NAME v$APP_VERSION"
 declare -r CLI_NAME='appinfo'
 
@@ -48,16 +50,20 @@ get_app_label()
 {
 	head_line="${1:-1}"
 	# debug "head_line: $head_line"
-	app_label=$($app_path --version 2> /dev/null | head "-$head_line" | xargs)
+	app_label=$($app_path --version 2> /dev/null | head "-$head_line" | trim)
 	# debug "get_app_label() | x${app_label}x | --version"
 	if [[ "x${app_label}x" == 'xx' ]]; then
-		app_label=$($app_path -v 2> /dev/null | head "-$head_line" | xargs)
+		app_label=$($app_path -v 2> /dev/null | head "-$head_line" | trim)
 		# debug "get_app_label() | x${app_label}x | -v"
 		if [[ "x${app_label}x" == 'xx' ]]; then
-			app_label=$($app_path -V 2> /dev/null | head "-$head_line" | xargs)
+			app_label=$($app_path -V 2> /dev/null | head "-$head_line" | trim)
 			# debug "get_app_label() | x${app_label}x | -V"
 			if [[ "x${app_label}x" == 'xx' ]]; then
-				app_label='unknown'
+				app_label=$($app_path 2>&1 | head "-$head_line" | trim)
+				# debug "get_app_label() | x${app_label}x | no options"
+				if [[ "x${app_label}x" == 'xx' ]]; then
+					app_label='unknown'
+				fi
 			fi
 		fi
 	fi
