@@ -5,6 +5,7 @@
 #####
 # ChangeLog
 # ---------
+# 2016-12-21  1.3.1      Cleaned up code a bit. Fixed a minor output bug.
 # 2016-12-20  1.3.0      Updated version number RegEx.
 #                        Switched back to xargs with echo for trimming.
 #                        Restructured app.
@@ -18,7 +19,7 @@
 # APP DATA
 #
 declare -r APP_NAME='AppInfo'
-declare -r APP_VERSION='1.3.0'
+declare -r APP_VERSION='1.3.1'
 declare -r APP_LABEL="$APP_NAME v$APP_VERSION"
 declare -r CLI_NAME='appinfo'
 
@@ -53,24 +54,15 @@ debug()
 	args=( "${args[@]:1}" )
 
 	printf "$msg_fmt\n" "${args[@]}" 1>&2
-	# echo "debug() | \$msg_fmt: $msg_fmt" 1>&2
-	# echo "debug() | \${args[@]}: ${args[@]}" 1>&2
 }
 
 
 get_app_info()
 {
-	# debug "get_app_info() | \$#: $#"
-
 	local -i exit_code
 	local -i head_line=${1:-1}
-	file_info=$(fileinfo "$app_path" | tail -n +2)
-	app_label=""
-	# debug "get_app_info() | \$head_line: $head_line"
 
-	# app_label=$(get_app_label "--version" $head_line | tr -cd '\11\12\15\40-\176')
-	# app_label=$(get_app_label "--version" $head_line | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/\x0f//g")
-	# app_label=$(get_app_label "--version" $head_line | sed "s/\x1B\[\([0-9]\{1,2\}\(;[0-9]\{1,2\}\)\?\)\?[mGK]//g")
+	file_info=$(fileinfo "$app_path" | tail -n +2)
 	app_label=$(get_app_label '--version' $head_line)
 	exit_code=$?
 	# debug "get_app_info() | \$exit_code: $exit_code | \$app_label: '$app_label'"
@@ -171,37 +163,12 @@ get_app_label()
 
 get_app_ver()
 {
-	# debug "get_app_ver() | \$#: $# | \$1: $1"
-
 	local app_label="$1"
 
 	if [[ "$app_label" =~ $VERSION_REGEX_STRICT ]]; then
-		# echo
-		# echo "get_app_ver() | strict | ---\$?: ---$?---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[*]}: ---${BASH_REMATCH[*]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[0]}: ---${BASH_REMATCH[0]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[1]}: ---${BASH_REMATCH[1]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[2]}: ---${BASH_REMATCH[2]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[3]}: ---${BASH_REMATCH[3]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[4]}: ---${BASH_REMATCH[4]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[5]}: ---${BASH_REMATCH[5]}---" | xargs echo
-		# echo "get_app_ver() | strict | ---\${BASH_REMATCH[6]}: ---${BASH_REMATCH[6]}---" | xargs echo
-		# echo
 		app_ver="${BASH_REMATCH[0]}"
 	elif [[ "$app_label" =~ $VERSION_REGEX_RELAXED ]]; then
-		# echo
-		# echo "get_app_ver() | relaxed | ---\$?: ---$?---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[*]}: ---${BASH_REMATCH[*]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[0]}: ---${BASH_REMATCH[0]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[1]}: ---${BASH_REMATCH[1]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[2]}: ---${BASH_REMATCH[2]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[3]}: ---${BASH_REMATCH[3]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[4]}: ---${BASH_REMATCH[4]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[5]}: ---${BASH_REMATCH[5]}---" | xargs echo
-		# echo "get_app_ver() | relaxed | ---\${BASH_REMATCH[6]}: ---${BASH_REMATCH[6]}---" | xargs echo
-		# echo
 		app_ver="${BASH_REMATCH[0]}"
-		echo "$app_ver"
 	else
 		# app_ver=$(echo "$app_label" | rev | cut -d' ' -f1 | rev)
 		# debug "get_app_ver() | no regex match"
@@ -220,8 +187,6 @@ get_symlink_ver()
 	local path=$(echo "$file_info" | tail -1 | head -1 | xargs echo)
 	local symlink=( $path )
 
-	# debug "get_symlink_ver() | \$path: $path"
-	# debug "get_symlink_ver() | \${symlink[0]}: ${symlink[0]}"
 	if [[ "${symlink[0]}" == 'Symlink' ]]; then
 		# debug "get_symlink_ver() | is symlink"
 		if [[ "$path" =~ $VERSION_REGEX_RELAXED ]]; then
