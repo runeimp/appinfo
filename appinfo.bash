@@ -5,6 +5,7 @@
 #####
 # ChangeLog
 # ---------
+# 2017-05-11  1.3.2      Updated get_app_info() to handle Tcl/Tk.
 # 2016-12-21  1.3.1      Cleaned up code a bit. Fixed a minor output bug.
 # 2016-12-20  1.3.0      Updated version number RegEx.
 #                        Switched back to xargs with echo for trimming.
@@ -19,7 +20,7 @@
 # APP DATA
 #
 declare -r APP_NAME='AppInfo'
-declare -r APP_VERSION='1.3.1'
+declare -r APP_VERSION='1.3.2'
 declare -r APP_LABEL="$APP_NAME v$APP_VERSION"
 declare -r CLI_NAME='appinfo'
 
@@ -61,55 +62,67 @@ get_app_info()
 {
 	local -i exit_code
 	local -i head_line=${1:-1}
+	# debug "get_app_info() | \$app_path: '$app_path' | \$app_name: $app_name | \$head_line: '$head_line'"
 
 	file_info=$(fileinfo "$app_path" | tail -n +2)
-	app_label=$(get_app_label '--version' $head_line)
-	exit_code=$?
-	# debug "get_app_info() | \$exit_code: $exit_code | \$app_label: '$app_label'"
-	if [[ $exit_code -eq 0 ]]; then
-		app_ver=$(get_app_ver "$app_label")
-		# debug "get_app_info() | --version | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
-	fi
 
-	if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
-		app_label=$(get_app_label '-v' $head_line)
+	if [[ "$app_name" == 'tclsh' ]]; then
+		app_label="Tcl/Tk $(echo 'puts [info patchlevel]; exit 0' | "$app_path")"
 		exit_code=$?
 		if [[ $exit_code -eq 0 ]]; then
 			app_ver=$(get_app_ver "$app_label")
-			# debug "get_app_info() | -v        | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
 		fi
-	fi
-
-	if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
-		app_label=$(get_app_label '-V' $head_line)
+		debug "get_app_info() | \$app_path: '$app_path' | \$app_name: $app_name | \$app_label: '$app_label' | \$app_ver: $app_ver"
+	else
+		app_label=$(get_app_label '--version' $head_line)
+		# debug "get_app_info() | \$app_path: '$app_path' | \$head_line: '$head_line' | \$app_label: '$app_label'"
 		exit_code=$?
+		# debug "get_app_info() | \$exit_code: $exit_code | \$app_label: '$app_label'"
 		if [[ $exit_code -eq 0 ]]; then
 			app_ver=$(get_app_ver "$app_label")
-			# debug "get_app_info() | -V        | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+			# debug "get_app_info() | --version | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
 		fi
-	fi
 
-	if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
-		app_label=$(get_app_label "version" $head_line)
-		exit_code=$?
-		if [[ $exit_code -eq 0 ]]; then
-			app_ver=$(get_app_ver "$app_label")
-			# debug "get_app_info() | version   | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+		if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
+			app_label=$(get_app_label '-v' $head_line)
+			exit_code=$?
+			if [[ $exit_code -eq 0 ]]; then
+				app_ver=$(get_app_ver "$app_label")
+				# debug "get_app_info() | -v        | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+			fi
 		fi
-	fi
 
-	if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
-		app_label=$(get_app_label '' $head_line)
-		exit_code=$?
-		if [[ $exit_code -eq 0 ]]; then
-			app_ver=$(get_app_ver "$app_label")
-			# debug "get_app_info() | no option | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+		if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
+			app_label=$(get_app_label '-V' $head_line)
+			exit_code=$?
+			if [[ $exit_code -eq 0 ]]; then
+				app_ver=$(get_app_ver "$app_label")
+				# debug "get_app_info() | -V        | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+			fi
 		fi
-	fi
 
-	if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
-		app_ver=$(get_symlink_ver)
-		exit_code=$?
+		if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
+			app_label=$(get_app_label "version" $head_line)
+			exit_code=$?
+			if [[ $exit_code -eq 0 ]]; then
+				app_ver=$(get_app_ver "$app_label")
+				# debug "get_app_info() | version   | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+			fi
+		fi
+
+		if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
+			app_label=$(get_app_label '' $head_line)
+			exit_code=$?
+			if [[ $exit_code -eq 0 ]]; then
+				app_ver=$(get_app_ver "$app_label")
+				# debug "get_app_info() | no option | \$exit_code: $exit_code | \$app_ver: '$app_ver'"
+			fi
+		fi
+
+		if [[ $exit_code -ne 0 ]] || [[ "x${app_label}x" == 'xx' ]]; then
+			app_ver=$(get_symlink_ver)
+			exit_code=$?
+		fi
 	fi
 
 	# debug "get_app_info() | \$exit_code: $exit_code | \$app_label: '$app_label'"
@@ -217,9 +230,11 @@ else
 
 	if [[ -e "$1" ]]; then
 		app_path="$1"
+		app_name="$(basename "$app_path")"
 		get_app_info 1
 	else
 		for app_path in $(which -a $1); do
+			app_name="$(basename "$app_path")"
 			get_app_info 1
 
 			# if [[ $? -ne 0 ]] && [[ "$app_label" = '' ]]; then
